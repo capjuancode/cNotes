@@ -1,0 +1,174 @@
+<table id="example" class="display" cellspacing="0" width="50%">
+    <thead>
+        <tr>
+            <th> <input name="select_all" value="1" id="example-select-all" type="checkbox" /> </th>
+            <th> Filter Order </th>
+            <th> ID </th>
+            <th> Name </th>
+            <th> Counts </th>
+        </tr>
+    </thead>
+    <tfoot>
+        <tr>
+            <th colspan="4" style="text-align: right"> Total:  </th>
+            <th> </th>
+        </tr>
+    </tfoot>
+    <tbody>
+        <tr>
+            <td> 0 </td>
+            <td> 1 </td>
+            <td> 101 </td>
+            <td> Edinburgh </td>
+            <td> $320,800 </td>
+        </tr>
+        <tr>
+            <td> 1 </td>
+            <td> 2 </td>
+            <td> 102 </td>
+            <td> Edinburgh </td>
+            <td> $320,800 </td>
+        </tr>
+        <tr>
+          <td> 1 </td>
+          <td> 3 </td>
+          <td> 103 </td>
+          <td> Edinburgh </td>
+          <td> $320,800 </td>
+        </tr>
+    </tbody>
+</table>
+
+
+<script>
+    $(document).ready(function() {
+
+        var table = $('#example').DataTable({
+            "paging": false,
+            "iDisplayStart": 50,
+            dom: 'Brltip',
+            'order': [1, 'asc'],
+            'aoColumns': [{
+                    'searchable': false,
+                    'orderable': false,
+                    'className': 'dt-body-center',
+                    'render': function(data, type, full, meta) {
+                        if (data == "1") {
+                            return '<input type="checkbox" checked name=" value="' + $('<div/>').text(data).html() + '">';
+                        } else {
+                            return '<input type="checkbox" name="" value="' + $('<div/>').text(data).html() + '">';
+                        }
+                    }
+                }, {
+                    "visible": false,
+                    'searchable': false,
+                    'orderable': false
+                }, {
+                    "visible": false,
+                    'searchable': false,
+                    'orderable': false
+                }, {
+                    'className': 'dt-body-center',
+                    'searchable': false,
+                    'orderable': false
+                }, {
+                    'className': 'dt-body-center',
+                    'searchable': false,
+                    'orderable': false
+                },
+
+            ],
+
+            "footerCallback": function(row, data, start, end, display) {
+                var api = this.api(),
+                    data;
+
+                // Remove the formatting to get integer data for summation
+                var intVal = function(i) {
+                    return typeof i === 'string' ?
+                        i.replace(/[\$,]/g, '') * 1 :
+                        typeof i === 'number' ?
+                        i : 0;
+                };
+
+                // Total over all pages
+                total = api
+                    .column(4)
+                    .data()
+                    .reduce(function(a, b) {
+                        return intVal(a) + intVal(b);
+                    }, 0);
+
+                // Total over this page
+                pageTotal = api
+                    .column(4, {
+                        page: 'current'
+                    })
+                    .data()
+                    .reduce(function(a, b) {
+                        return intVal(a) + intVal(b);
+                    }, 0);
+
+                // Update footer
+                $(api.column(4).footer()).html(
+                    '$' + pageTotal + ' ( $' + total + ' total)'
+                );
+            }
+        });
+
+
+        // Handle click on "Select all" control
+        $('#example-select-all').on('click', function() {
+            // Check/uncheck all checkboxes in the table
+            var rows = table.rows({
+                'search': 'applied'
+            }).nodes();
+            $('input[type="checkbox"]', rows).prop('checked', this.checked);
+        });
+
+        // Handle click on checkbox to set state of "Select all" control
+        $('#example tbody').on('change', 'input[type="checkbox"]', function() {
+            // If checkbox is not checked
+            if (!this.checked) {
+                var el = $('#example-select-all').get(0);
+                // If "Select all" control is checked and has 'indeterminate' property
+                if (el && el.checked && ('indeterminate' in el)) {
+                    // Set visual state of "Select all" control
+                    // as 'indeterminate'
+                    el.indeterminate = true;
+                }
+            }
+        });
+
+        //      $('#frm-example').on('submit', function(e){
+        //      var form = this;
+
+        //      // Iterate over all checkboxes in the table
+        //      table.$('input[type="checkbox"]').each(function(){
+        //         // If checkbox doesn't exist in DOM
+        //         if(!$.contains(document, this)){
+        //            // If checkbox is checked
+        //            if(this.checked){
+        //               // Create a hidden element
+        //               $(form).append(
+        //                  $('<input>')
+        //                     .attr('type', 'hidden')
+        //                     .attr('name', this.name)
+        //                     .val(this.value)
+        //               );
+        //            }
+        //         }
+        //      });
+
+        //            // FOR TESTING ONLY
+        //
+        //      // Output form data to a console
+        //      $('#example-console').text($(form).serialize());
+        //      console.log("Form submission", $(form).serialize());
+        //
+        //      // Prevent actual form submission
+        //      e.preventDefault();
+        //   });
+
+    });
+</script>
