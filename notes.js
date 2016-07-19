@@ -106,3 +106,10 @@ $('#Example').on('click', 'tbody tr', function() {
 
 //===========================================================================================
 //change date on datepiker
+
+
+//check array of objects in a variables
+
+$.each(obj, function (key, element) {
+    console.log('key: ' + key + '\n' + 'value: ' + element);
+});
